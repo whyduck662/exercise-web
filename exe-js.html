@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <style>
+        :root {
+            --primary: #2997ff;
+            --bg: #0a0a0c;
+            --card: #161618;
+            --text: #ffffff;
+            --border: rgba(255,255,255,0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 40px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        /* Form Style */
+        .form-section { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 30px; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        input { background: #2c2c2e; border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white; outline: none; }
+        input:focus { border-color: var(--primary); }
+        button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        button:hover { opacity: 0.8; }
+
+        /* Table Style */
+        table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 15px; overflow: hidden; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: rgba(255,255,255,0.05); color: var(--primary); text-transform: uppercase; font-size: 0.8rem; }
+        .btn-edit { background: #ff9f0a; padding: 5px 10px; font-size: 0.8rem; }
+        .btn-delete { background: #ff453a; padding: 5px 10px; font-size: 0.8rem; margin-left: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Student Management</h1>
+    
+    <div class="form-section">
+        <h3 id="form-title">Add New Student</h3>
+        <div class="grid-inputs">
+            <input type="text" id="studentId" placeholder="Student ID (e.g. B23DCCN001)">
+            <input type="text" id="fullName" placeholder="Full Name">
+            <input type="date" id="dob">
+            <input type="text" id="className" placeholder="Class">
+            <input type="number" id="gpa" step="0.01" min="0" max="4" placeholder="GPA (0 - 4.0)">
+        </div>
+        <input type="hidden" id="editIndex" value="-1">
+        <button onclick="handleFormSubmit()" id="submit-btn">Add Student</button>
+        <button onclick="resetForm()" style="background: #3a3a3c;">Cancel</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>DOB</th>
+                <th>Class</th>
+                <th>GPA</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="studentTableBody">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    // 1. Định nghĩa Class SinhVien theo yêu cầu
+    class Student {
+        constructor(id, name, dob, className, gpa) {
+            this.id = id;
+            this.name = name;
+            this.dob = dob;
+            this.className = className;
+            this.gpa = gpa;
+        }
+
+        // Phương thức cập nhật thông tin
+        updateInfo(name, dob, className, gpa) {
+            this.name = name;
+            this.dob = dob;
+            this.className = className;
+            this.gpa = gpa;
+        }
+    }
+
+    // 2. Quản lý danh sách sinh viên
+    let studentList = [];
+
+    function handleFormSubmit() {
+        const id = document.getElementById('studentId').value;
+        const name = document.getElementById('fullName').value;
+        const dob = document.getElementById('dob').value;
+        const className = document.getElementById('className').value;
+        const gpa = document.getElementById('gpa').value;
+        const editIndex = parseInt(document.getElementById('editIndex').value);
+
+        if (!id || !name || !dob || !className || !gpa) {
+            alert("Please fill all fields!");
+            return;
+        }
+
+        if (editIndex === -1) {
+            // Thêm mới
+            const newStudent = new Student(id, name, dob, className, gpa);
+            studentList.push(newStudent);
+        } else {
+            // Cập nhật thông tin qua phương thức của đối tượng
+            studentList[editIndex].updateInfo(name, dob, className, gpa);
+            document.getElementById('editIndex').value = "-1";
+            document.getElementById('submit-btn').innerText = "Add Student";
+            document.getElementById('form-title').innerText = "Add New Student";
+            document.getElementById('studentId').disabled = false;
+        }
+
+        resetForm();
+        renderTable();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('studentTableBody');
+        tbody.innerHTML = "";
+
+        studentList.forEach((student, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.dob}</td>
+                    <td>${student.className}</td>
+                    <td><b>${student.gpa}</b></td>
+                    <td>
+                        <button class="btn-edit" onclick="editStudent(${index})">Edit</button>
+                        <button class="btn-delete" onclick="deleteStudent(${index})">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function editStudent(index) {
+        const s = studentList[index];
+        document.getElementById('studentId').value = s.id;
+        document.getElementById('studentId').disabled = true; // Không cho sửa mã SV
+        document.getElementById('fullName').value = s.name;
+        document.getElementById('dob').value = s.dob;
+        document.getElementById('className').value = s.className;
+        document.getElementById('gpa').value = s.gpa;
+        document.getElementById('editIndex').value = index;
+
+        document.getElementById('submit-btn').innerText = "Update Info";
+        document.getElementById('form-title').innerText = "Editing Student: " + s.id;
+    }
+
+    function deleteStudent(index) {
+        if(confirm("Delete this student?")) {
+            studentList.splice(index, 1);
+            renderTable();
+        }
+    }
+
+    function resetForm() {
+        document.getElementById('studentId').value = "";
+        document.getElementById('fullName').value = "";
+        document.getElementById('dob').value = "";
+        document.getElementById('className').value = "";
+        document.getElementById('gpa').value = "";
+        document.getElementById('studentId').disabled = false;
+        document.getElementById('editIndex').value = "-1";
+        document.getElementById('submit-btn').innerText = "Add Student";
+    }
+</script>
+
+</body>
+</html>
