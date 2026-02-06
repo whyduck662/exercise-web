@@ -101,6 +101,23 @@
             alert("Please fill all fields!");
             return;
         }
+        const NameRegex = /^[a-zA-ZÀ-ỹ\s]{2,}$/;
+        if ( !NameRegex.test(name)){
+            alert("Name must be at least 2 characters and contain only letters.");
+            return;
+        }
+
+        if ( editIndex == -1 ){
+            const isDup = studentList.some(s => s.id.toLowerCase() === id.toLowerCase());
+            if ( isDup){
+                alert("Student ID already exists!");
+                return;
+            }
+        }
+        if (gpa < 0 || gpa > 4.0) {
+            alert("GPA must be between 0.0 and 4.0");
+            return;
+        }
 
         if (editIndex === -1) {
             // Thêm mới
@@ -176,3 +193,4 @@
 </body>
 
 </html>
+
