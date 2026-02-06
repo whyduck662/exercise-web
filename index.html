@@ -114,9 +114,9 @@
                 return;
             }
         }
-        if (gpa < 0 || gpa > 4.0) {
-            alert("GPA must be between 0.0 and 4.0");
-            return;
+        if (isNaN(gpa) || gpa < 0 || gpa > 4.0) {
+        alert("GPA must be a number between 0.0 and 4.0");
+        return;
         }
 
         if (editIndex === -1) {
@@ -193,4 +193,5 @@
 </body>
 
 </html>
+
 
